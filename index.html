@@ -210,7 +210,7 @@
 // ─────────────────────────────────────────────
 // CONFIGURATION — paste your Apps Script URL below
 // ─────────────────────────────────────────────
-var SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxlTdJuXPO5Twa_W9q8DoxxufpiP59LEYw7S9tctR8aHhLWzwbB7wRpsm8qjvb_enUi/exec";
+var SCRIPT_URL = "PASTE_YOUR_APPS_SCRIPT_URL_HERE";
 // ─────────────────────────────────────────────
 
 var mandates = [];
@@ -224,16 +224,34 @@ function api(params, cb) {
     showToast("Paste your Apps Script URL into the HTML file to connect live data.", true);
     renderDemoTable(); return;
   }
-  // Apps Script loses GET params on redirect — use POST with form-encoded body instead
-  var body = Object.keys(params).map(k => encodeURIComponent(k) + "=" + encodeURIComponent(params[k])).join("&");
-  fetch(SCRIPT_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: body
-  })
-    .then(r => r.json())
-    .then(cb)
-    .catch(e => { showToast("Connection error. Check your script URL.", true); console.error(e); });
+  var qs = Object.keys(params).map(k => encodeURIComponent(k) + "=" + encodeURIComponent(params[k])).join("&");
+  var url = SCRIPT_URL + "?" + qs;
+  if (params.action === "getAll" || params.action === "verifyPassword") {
+    var cbName = "_cb_" + Date.now();
+    window[cbName] = function(data) {
+      delete window[cbName];
+      var el = document.getElementById(cbName);
+      if (el) el.remove();
+      cb(data);
+    };
+    var s = document.createElement("script");
+    s.id = cbName;
+    s.src = url + "&callback=" + cbName;
+    s.onerror = function() {
+      delete window[cbName];
+      s.remove();
+      fetch(url, { redirect: "follow" })
+        .then(r => r.json())
+        .then(cb)
+        .catch(e => { showToast("Connection error. Check your Apps Script URL.", true); console.error(e); });
+    };
+    document.head.appendChild(s);
+  } else {
+    fetch(url, { redirect: "follow", mode: "no-cors" })
+      .catch(() => {})
+      .finally(() => { setTimeout(loadAll, 1500); });
+    cb({ success: true });
+  }
 }
 
 function loadAll() {
