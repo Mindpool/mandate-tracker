@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mandate Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+  :root {
+    --bg: #f5f4f0;
+    --surface: #ffffff;
+    --surface2: #f0efe9;
+    --border: rgba(0,0,0,0.09);
+    --border-strong: rgba(0,0,0,0.18);
+    --text: #1a1a18;
+    --text2: #6b6b62;
+    --text3: #9e9e93;
+    --accent: #1a1a18;
+    --high: #c23b22;    --high-bg: #fdf0ed;
+    --med: #9a6200;     --med-bg: #fef7e6;
+    --low: #1a7a4a;     --low-bg: #edf7f2;
+    --open-c: #1550a0;  --open-bg: #eaf0fc;
+    --filled-c: #1a7a4a;--filled-bg: #edf7f2;
+    --closed-c: #6b6b62;--closed-bg: #f0efe9;
+    --radius: 10px; --radius-lg: 14px;
+    --font: 'DM Sans', sans-serif;
+    --font-mono: 'DM Mono', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; font-size: 14px; }
+  .page { max-width: 1400px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+  /* Header */
+  .header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem; }
+  .header-brand { font-size: 11px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text3); margin-bottom: 6px; }
+  .header-title { font-size: 26px; font-weight: 600; letter-spacing: -0.02em; }
+  .header-sub { font-size: 13px; color: var(--text2); margin-top: 3px; }
+  .auth-badge { display: flex; align-items: center; gap: 7px; padding: 7px 13px; border-radius: var(--radius); border: 1px solid var(--border); background: var(--surface); font-size: 12px; color: var(--text2); cursor: pointer; transition: background .15s; user-select: none; }
+  .auth-badge:hover { background: var(--surface2); }
+  .auth-badge .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--text3); flex-shrink: 0; }
+  .auth-badge.editor .dot { background: var(--low); }
+  .auth-badge.editor { color: var(--text); }
+
+  /* Stats */
+  .stats { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 12px; margin-bottom: 1.75rem; }
+  .stat { background: var(--surface); border-radius: var(--radius-lg); border: 1px solid var(--border); padding: 16px 18px; }
+  .stat-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text3); font-weight: 500; margin-bottom: 8px; }
+  .stat-val { font-size: 28px; font-weight: 600; letter-spacing: -0.03em; font-family: var(--font-mono); }
+  .stat-val.c-hi { color: var(--high); }
+  .stat-val.c-lo { color: var(--low); }
+
+  /* Toolbar */
+  .toolbar { display: flex; align-items: center; gap: 10px; margin-bottom: 1.25rem; flex-wrap: wrap; }
+  select { font-family: var(--font); font-size: 13px; padding: 7px 30px 7px 11px; border-radius: var(--radius); border: 1px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239e9e93' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 9px center; }
+  select:focus { outline: none; border-color: var(--border-strong); }
+  .spacer { flex: 1; }
+  .btn-add { display: flex; align-items: center; gap: 7px; padding: 8px 16px; border-radius: var(--radius); border: none; background: var(--accent); color: #fff; font-family: var(--font); font-size: 13px; font-weight: 500; cursor: pointer; transition: opacity .15s; white-space: nowrap; }
+  .btn-add:hover { opacity: .82; }
+  .btn-add:disabled { opacity: .35; cursor: not-allowed; }
+
+  /* Loading */
+  .loading { text-align: center; padding: 4rem 2rem; color: var(--text3); font-size: 13px; }
+  .spinner { width: 28px; height: 28px; border: 2px solid var(--border); border-top-color: var(--text2); border-radius: 50%; animation: spin .7s linear infinite; margin: 0 auto 12px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Table */
+  .table-wrap { background: var(--surface); border-radius: var(--radius-lg); border: 1px solid var(--border); overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; min-width: 1000px; }
+  thead th { padding: 11px 13px; text-align: left; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text3); background: var(--surface2); border-bottom: 1px solid var(--border); white-space: nowrap; }
+  tbody tr { border-bottom: 1px solid var(--border); transition: background .1s; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: #fafaf7; }
+  tbody td { padding: 11px 13px; vertical-align: middle; }
+  .td-role { font-weight: 500; font-size: 13px; min-width: 150px; }
+  .td-sub { font-size: 12px; color: var(--text2); }
+  .td-mono { font-size: 12px; color: var(--text3); font-family: var(--font-mono); }
+  .td-exp { font-size: 12px; font-family: var(--font-mono); color: var(--text2); white-space: nowrap; }
+
+  /* Badge */
+  .badge { display: inline-flex; align-items: center; padding: 3px 9px; border-radius: 99px; font-size: 11px; font-weight: 600; letter-spacing: .03em; white-space: nowrap; }
+  .badge-high    { background: var(--high-bg);   color: var(--high); }
+  .badge-med     { background: var(--med-bg);    color: var(--med); }
+  .badge-low     { background: var(--low-bg);    color: var(--low); }
+  .badge-open    { background: var(--open-bg);   color: var(--open-c); }
+  .badge-filled  { background: var(--filled-bg); color: var(--filled-c); }
+  .badge-closed  { background: var(--closed-bg); color: var(--closed-c); }
+
+  /* CV control */
+  .cv-ctrl { display: flex; align-items: center; gap: 7px; }
+  .cv-btn { width: 24px; height: 24px; border-radius: 50%; border: 1px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; font-size: 15px; display: flex; align-items: center; justify-content: center; transition: background .1s, border-color .1s; }
+  .cv-btn:hover:not(:disabled) { background: var(--surface2); border-color: var(--border-strong); }
+  .cv-btn:disabled { opacity: .3; cursor: not-allowed; }
+  .cv-num { font-family: var(--font-mono); font-size: 14px; font-weight: 500; min-width: 22px; text-align: center; }
+
+  /* Status remarks cell */
+  .td-status-wrap { display: flex; flex-direction: column; gap: 4px; min-width: 130px; }
+  .td-remarks { font-size: 11px; color: var(--text2); line-height: 1.4; max-width: 160px; }
+
+  /* Actions */
+  .act-wrap { display: flex; gap: 3px; }
+  .act-btn { width: 30px; height: 30px; border-radius: var(--radius); border: 1px solid transparent; background: transparent; color: var(--text3); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 15px; transition: all .1s; }
+  .act-btn:hover { background: var(--surface2); border-color: var(--border); color: var(--text); }
+  .act-btn.del:hover { background: var(--high-bg); color: var(--high); border-color: transparent; }
+
+  /* Empty */
+  .empty { text-align: center; padding: 3rem; color: var(--text3); font-size: 13px; }
+  .empty i { font-size: 32px; display: block; margin-bottom: 8px; opacity: .4; }
+
+  /* Modal overlay */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.4); display: flex; align-items: center; justify-content: center; z-index: 100; padding: 1rem; backdrop-filter: blur(2px); overflow-y: auto; }
+  .modal { background: var(--surface); border-radius: var(--radius-lg); border: 1px solid var(--border); padding: 1.75rem; width: 100%; max-width: 520px; animation: modalIn .18s ease; margin: auto; }
+  @keyframes modalIn { from { transform: translateY(12px); opacity: 0; } to { transform: none; opacity: 1; } }
+  .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
+  .modal-title { font-size: 16px; font-weight: 600; }
+  .modal-close { width: 28px; height: 28px; border: none; background: none; cursor: pointer; border-radius: var(--radius); color: var(--text3); display: flex; align-items: center; justify-content: center; font-size: 16px; }
+  .modal-close:hover { background: var(--surface2); color: var(--text); }
+
+  /* Form grid */
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .form-grid .full { grid-column: 1 / -1; }
+  .form-group label { display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .07em; color: var(--text3); margin-bottom: 5px; }
+  .form-group input, .form-group select, .form-group textarea {
+    width: 100%; font-family: var(--font); font-size: 13px; padding: 8px 11px;
+    border-radius: var(--radius); border: 1px solid var(--border);
+    background: var(--surface); color: var(--text); transition: border-color .15s;
+  }
+  .form-group select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239e9e93' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 9px center; background-color: var(--surface); padding-right: 28px; }
+  .form-group textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: var(--border-strong); }
+  .modal-footer { display: flex; gap: 8px; justify-content: flex-end; margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid var(--border); }
+  .btn-cancel { font-family: var(--font); font-size: 13px; padding: 8px 16px; border-radius: var(--radius); border: 1px solid var(--border); background: transparent; color: var(--text2); cursor: pointer; }
+  .btn-cancel:hover { background: var(--surface2); }
+  .btn-primary { font-family: var(--font); font-size: 13px; font-weight: 500; padding: 8px 18px; border-radius: var(--radius); border: none; background: var(--accent); color: #fff; cursor: pointer; transition: opacity .15s; }
+  .btn-primary:hover { opacity: .82; }
+
+  /* Auth modal */
+  .auth-modal { max-width: 340px; }
+
+  /* Toast */
+  .toast { position: fixed; bottom: 1.5rem; right: 1.5rem; background: var(--text); color: #fff; padding: 10px 16px; border-radius: var(--radius); font-size: 13px; z-index: 200; animation: toastIn .2s ease; max-width: 300px; }
+  .toast.err { background: var(--high); }
+  @keyframes toastIn { from { transform: translateY(8px); opacity: 0; } to { transform: none; opacity: 1; } }
+
+  @media (max-width: 700px) {
+    .stats { grid-template-columns: repeat(2,1fr); }
+    .form-grid { grid-template-columns: 1fr; }
+    .form-grid .full { grid-column: 1; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div>
+      <div class="header-brand">Talent Acquisition</div>
+      <div class="header-title">Mandate Tracker</div>
+      <div class="header-sub">Banking clients · Live from Google Sheets</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <div class="auth-badge" id="authBadge" onclick="toggleAuth()">
+        <span class="dot"></span>
+        <span id="authLabel">View only</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats">
+    <div class="stat"><div class="stat-label">Total mandates</div><div class="stat-val" id="s-total">—</div></div>
+    <div class="stat"><div class="stat-label">Open</div><div class="stat-val" id="s-open">—</div></div>
+    <div class="stat"><div class="stat-label">High priority</div><div class="stat-val c-hi" id="s-high">—</div></div>
+    <div class="stat"><div class="stat-label">Total CVs sent</div><div class="stat-val c-lo" id="s-cvs">—</div></div>
+  </div>
+
+  <!-- TOOLBAR -->
+  <div class="toolbar">
+    <select id="f-client" onchange="applyFilters()"><option value="">All clients</option></select>
+    <select id="f-loc" onchange="applyFilters()"><option value="">All locations</option></select>
+    <select id="f-pri" onchange="applyFilters()">
+      <option value="">All priorities</option>
+      <option>High</option><option>Moderate</option><option>Low</option>
+    </select>
+    <select id="f-status" onchange="applyFilters()">
+      <option value="">All statuses</option>
+      <option>Open</option><option>Filled</option><option>Closed</option>
+    </select>
+    <div class="spacer"></div>
+    <button class="btn-add" id="addBtn" onclick="openAddModal()" disabled>
+      <i class="ti ti-plus"></i> Add mandate
+    </button>
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-wrap">
+    <div id="tableArea">
+      <div class="loading"><div class="spinner"></div>Connecting to Google Sheets…</div>
+    </div>
+  </div>
+
+</div>
+
+<div id="modalContainer"></div>
+<div id="toastContainer"></div>
+
+<script>
+// ─────────────────────────────────────────────
+// CONFIGURATION — paste your Apps Script URL below
+// ─────────────────────────────────────────────
+var SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyCYefe6ypxF8ZSAhPzla1N4EMROJ6_Uxw_YCFeTTueAxgJBtHTgAN7iA1tcATmyZFYxw/exec";
+// ─────────────────────────────────────────────
+
+var mandates = [];
+var filtered = [];
+var isEditor = false;
+var editingId = null;
+
+// ── API ──────────────────────────────────────
+function api(params, cb) {
+  if (SCRIPT_URL === "https://script.google.com/macros/s/AKfycbyCYefe6ypxF8ZSAhPzla1N4EMROJ6_Uxw_YCFeTTueAxgJBtHTgAN7iA1tcATmyZFYxw/exec") {
+    showToast("Paste your Apps Script URL into the HTML file to connect live data.", true);
+    renderDemoTable(); return;
+  }
+  var qs = Object.keys(params).map(k => encodeURIComponent(k) + "=" + encodeURIComponent(params[k])).join("&");
+  var url = SCRIPT_URL + "?" + qs;
+  if (params.action === "getAll" || params.action === "verifyPassword") {
+    var cbName = "_cb_" + Date.now();
+    window[cbName] = function(data) {
+      delete window[cbName];
+      var el = document.getElementById(cbName);
+      if (el) el.remove();
+      cb(data);
+    };
+    var s = document.createElement("script");
+    s.id = cbName;
+    s.src = url + "&callback=" + cbName;
+    s.onerror = function() {
+      delete window[cbName];
+      s.remove();
+      fetch(url, { redirect: "follow" })
+        .then(r => r.json())
+        .then(cb)
+        .catch(e => { showToast("Connection error. Check your Apps Script URL.", true); console.error(e); });
+    };
+    document.head.appendChild(s);
+  } else {
+    fetch(url, { redirect: "follow", mode: "no-cors" })
+      .catch(() => {})
+      .finally(() => { setTimeout(loadAll, 1500); });
+    cb({ success: true });
+  }
+}
+
+function loadAll() {
+  api({ action: "getAll" }, function(res) {
+    if (res.success) { mandates = res.mandates; populateFilters(); applyFilters(); renderStats(); }
+    else showToast("Could not load: " + res.error, true);
+  });
+}
+
+// ── STATS ────────────────────────────────────
+function renderStats() {
+  document.getElementById("s-total").textContent = mandates.length;
+  document.getElementById("s-open").textContent  = mandates.filter(m => m.status === "Open").length;
+  document.getElementById("s-high").textContent  = mandates.filter(m => m.priority === "High" && m.status === "Open").length;
+  document.getElementById("s-cvs").textContent   = mandates.reduce((s,m) => s + (parseInt(m.cvs)||0), 0);
+}
+
+// ── FILTERS ──────────────────────────────────
+function populateFilters() {
+  var clients = [...new Set(mandates.map(m => m.client))].sort();
+  var locs    = [...new Set(mandates.map(m => m.location))].sort();
+  var fc = document.getElementById("f-client"), fl = document.getElementById("f-loc");
+  var cc = fc.value, cl = fl.value;
+  fc.innerHTML = '<option value="">All clients</option>'   + clients.map(c => `<option value="${c}" ${c===cc?"selected":""}>${c}</option>`).join("");
+  fl.innerHTML = '<option value="">All locations</option>' + locs.map(l   => `<option value="${l}" ${l===cl?"selected":""}>${l}</option>`).join("");
+}
+
+function applyFilters() {
+  var c = document.getElementById("f-client").value;
+  var l = document.getElementById("f-loc").value;
+  var p = document.getElementById("f-pri").value;
+  var s = document.getElementById("f-status").value;
+  filtered = mandates.filter(m => (!c||m.client===c) && (!l||m.location===l) && (!p||m.priority===p) && (!s||m.status===s));
+  renderTable();
+}
+
+// ── TABLE ────────────────────────────────────
+function priClass(p) { return p==="High"?"badge-high":p==="Moderate"?"badge-med":"badge-low"; }
+function stClass(s)  { return s==="Open"?"badge-open":s==="Filled"?"badge-filled":"badge-closed"; }
+function fmtDate(d) {
+  if (!d) return "—";
+  try { return new Date(d).toLocaleDateString("en-IN",{day:"2-digit",month:"short",year:"numeric"}); } catch(e){ return d; }
+}
+
+function renderTable() {
+  var area = document.getElementById("tableArea");
+  if (!filtered.length) {
+    area.innerHTML = '<div class="empty"><i class="ti ti-clipboard-x"></i>No mandates match the current filters.</div>';
+    return;
+  }
+  var rows = filtered.map(m => `
+    <tr>
+      <td><div class="td-role">${esc(m.role)}</div></td>
+      <td><div class="td-sub">${esc(m.client)}</div></td>
+      <td><div class="td-sub">${esc(m.hrSpoc||"—")}</div></td>
+      <td><div class="td-sub" style="display:flex;align-items:center;gap:4px"><i class="ti ti-map-pin" style="font-size:11px;opacity:.5"></i>${esc(m.location)}</div></td>
+      <td><div class="td-exp">${esc(m.ctcRange||"—")}</div></td>
+      <td><div class="td-exp">${m.minExp ? esc(m.minExp)+" yrs" : "—"}</div></td>
+      <td><span class="badge ${priClass(m.priority)}">${m.priority}</span></td>
+      <td><div class="td-mono">${fmtDate(m.openSince)}</div></td>
+      <td>
+        <div class="cv-ctrl">
+          <button class="cv-btn" onclick="changeCv('${m.id}',-1)" ${!isEditor?"disabled":""}>−</button>
+          <span class="cv-num">${m.cvs}</span>
+          <button class="cv-btn" onclick="changeCv('${m.id}',1)"  ${!isEditor?"disabled":""}>+</button>
+        </div>
+      </td>
+      <td>
+        <div class="td-status-wrap">
+          <span class="badge ${stClass(m.status)}">${esc(m.status.split("/")[0].trim())}</span>
+          ${m.status.includes("/")?`<div class="td-remarks">${esc(m.status.split("/").slice(1).join("/").trim())}</div>`:""}
+        </div>
+      </td>
+      <td>
+        <div class="act-wrap">
+          ${isEditor?`
+            <button class="act-btn" onclick="openEditModal('${m.id}')" title="Edit"><i class="ti ti-pencil"></i></button>
+            <button class="act-btn del" onclick="confirmDelete('${m.id}')" title="Delete"><i class="ti ti-trash"></i></button>`:""}
+        </div>
+      </td>
+    </tr>`).join("");
+
+  area.innerHTML = `<table>
+    <thead><tr>
+      <th>Role / Mandate</th>
+      <th>Client</th>
+      <th>HR SPOC</th>
+      <th>Location</th>
+      <th>CTC Range</th>
+      <th>Min Exp</th>
+      <th>Priority</th>
+      <th>Open Since</th>
+      <th>CVs Sent</th>
+      <th>Status / Remarks</th>
+      <th></th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+}
+
+function renderDemoTable() {
+  mandates = [
+    { id:"1", role:"VP Credit Risk", client:"HDFC Bank", hrSpoc:"Priya Sharma", location:"Mumbai", ctcRange:"₹28–35 LPA", minExp:"8", priority:"High", openSince:"2025-04-10", cvs:8, status:"Open" },
+    { id:"2", role:"Retail Branch Manager", client:"ICICI Bank", hrSpoc:"Rohit Nair", location:"Delhi", ctcRange:"₹18–24 LPA", minExp:"5", priority:"High", openSince:"2025-04-18", cvs:5, status:"Open" },
+    { id:"3", role:"Trade Finance Analyst", client:"Axis Bank", hrSpoc:"Sneha Iyer", location:"Mumbai", ctcRange:"₹12–16 LPA", minExp:"3", priority:"Moderate", openSince:"2025-05-01", cvs:12, status:"Open" },
+    { id:"4", role:"SME Relationship Manager", client:"Yes Bank", hrSpoc:"Karan Mehta", location:"Chennai", ctcRange:"₹15–20 LPA", minExp:"4", priority:"High", openSince:"2025-05-15", cvs:9, status:"Filled / Joined 2 Jun" },
+  ];
+  populateFilters(); applyFilters(); renderStats();
+}
+
+// ── CV UPDATE ────────────────────────────────
+function changeCv(id, delta) {
+  var m = mandates.find(x => x.id === id);
+  if (!m) return;
+  var newCvs = Math.max(0, (parseInt(m.cvs)||0) + delta);
+  api({ action:"updateCvs", id, cvs:newCvs }, function(res) {
+    if (res.success) { m.cvs = newCvs; renderStats(); applyFilters(); }
+    else showToast("Failed to update CVs", true);
+  });
+}
+
+// ── ADD / EDIT MODAL ─────────────────────────
+function openAddModal()    { editingId = null; showMandateModal(null); }
+function openEditModal(id) { editingId = id;   showMandateModal(mandates.find(m => m.id === id)); }
+
+function showMandateModal(m) {
+  var today = new Date().toISOString().split("T")[0];
+  document.getElementById("modalContainer").innerHTML = `
+    <div class="modal-overlay" onclick="if(event.target===this)closeModal()">
+      <div class="modal">
+        <div class="modal-header">
+          <div class="modal-title">${m ? "Edit mandate" : "Add new mandate"}</div>
+          <button class="modal-close" onclick="closeModal()"><i class="ti ti-x"></i></button>
+        </div>
+        <div class="form-grid">
+          <div class="form-group full">
+            <label>Role / Mandate title</label>
+            <input id="m-role" placeholder="e.g. Senior Credit Analyst" value="${m?esc(m.role):''}">
+          </div>
+          <div class="form-group">
+            <label>Client</label>
+            <input id="m-client" placeholder="e.g. HDFC Bank" value="${m?esc(m.client):''}">
+          </div>
+          <div class="form-group">
+            <label>HR SPOC</label>
+            <input id="m-hrspoc" placeholder="e.g. Priya Sharma" value="${m?esc(m.hrSpoc||''):''}">
+          </div>
+          <div class="form-group">
+            <label>Location</label>
+            <input id="m-loc" placeholder="e.g. Mumbai" value="${m?esc(m.location):''}">
+          </div>
+          <div class="form-group">
+            <label>CTC Range</label>
+            <input id="m-ctc" placeholder="e.g. ₹18–24 LPA" value="${m?esc(m.ctcRange||''):''}">
+          </div>
+          <div class="form-group">
+            <label>Min Experience (years)</label>
+            <input id="m-exp" type="number" min="0" placeholder="e.g. 5" value="${m?esc(m.minExp||''):''}">
+          </div>
+          <div class="form-group">
+            <label>Priority</label>
+            <select id="m-pri">
+              <option ${(!m||m.priority==="High")?"selected":""}>High</option>
+              <option ${(m&&m.priority==="Moderate")?"selected":""}>Moderate</option>
+              <option ${(m&&m.priority==="Low")?"selected":""}>Low</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Open since</label>
+            <input type="date" id="m-date" value="${m?m.openSince:today}">
+          </div>
+          <div class="form-group">
+            <label>CVs sent</label>
+            <input type="number" id="m-cvs" min="0" value="${m?m.cvs:0}">
+          </div>
+          <div class="form-group full">
+            <label>Status / Remarks</label>
+            <textarea id="m-status" placeholder="e.g. Open · 2 candidates in final round · client feedback awaited">${m?esc(m.status):''}</textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+          <button class="btn-primary" onclick="saveMandate()">${m?"Save changes":"Add mandate"}</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function saveMandate() {
+  var role   = document.getElementById("m-role").value.trim();
+  var client = document.getElementById("m-client").value.trim();
+  var loc    = document.getElementById("m-loc").value.trim();
+  if (!role||!client||!loc) { showToast("Role, client and location are required.", true); return; }
+  var params = {
+    role, client, location: loc,
+    hrSpoc:   document.getElementById("m-hrspoc").value.trim(),
+    ctcRange: document.getElementById("m-ctc").value.trim(),
+    minExp:   document.getElementById("m-exp").value.trim(),
+    priority: document.getElementById("m-pri").value,
+    openSince:document.getElementById("m-date").value,
+    cvs:      parseInt(document.getElementById("m-cvs").value)||0,
+    status:   document.getElementById("m-status").value.trim() || "Open"
+  };
+  if (editingId) {
+    params.action = "update"; params.id = editingId;
+    api(params, function(res) {
+      if (res.success) { closeModal(); showToast("Mandate updated."); loadAll(); }
+      else showToast("Update failed: " + res.error, true);
+    });
+  } else {
+    params.action = "add";
+    api(params, function(res) {
+      if (res.success) { closeModal(); showToast("Mandate added."); loadAll(); }
+      else showToast("Could not add mandate: " + res.error, true);
+    });
+  }
+}
+
+function confirmDelete(id) {
+  var m = mandates.find(x => x.id === id);
+  if (!m || !confirm("Delete mandate: "" + m.role + ""?\nThis cannot be undone.")) return;
+  api({ action:"delete", id }, function(res) {
+    if (res.success) { showToast("Mandate deleted."); loadAll(); }
+    else showToast("Delete failed: " + res.error, true);
+  });
+}
+
+function closeModal() { document.getElementById("modalContainer").innerHTML = ""; }
+
+// ── AUTH ─────────────────────────────────────
+function toggleAuth() {
+  if (isEditor) { isEditor = false; updateEditorUI(); showToast("Switched to view-only mode."); return; }
+  document.getElementById("modalContainer").innerHTML = `
+    <div class="modal-overlay" onclick="if(event.target===this)closeModal()">
+      <div class="modal auth-modal">
+        <div class="modal-header">
+          <div class="modal-title">Editor access</div>
+          <button class="modal-close" onclick="closeModal()"><i class="ti ti-x"></i></button>
+        </div>
+        <div class="form-group" style="margin-bottom:1rem">
+          <label>Password</label>
+          <input type="password" id="auth-pw" placeholder="Enter editor password" onkeydown="if(event.key==='Enter')doAuth()">
+        </div>
+        <div class="modal-footer">
+          <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+          <button class="btn-primary" onclick="doAuth()">Unlock</button>
+        </div>
+      </div>
+    </div>`;
+  setTimeout(() => { var el = document.getElementById("auth-pw"); if(el) el.focus(); }, 50);
+}
+
+function doAuth() {
+  var pw = document.getElementById("auth-pw").value;
+  api({ action:"verifyPassword", password:pw }, function(res) {
+    if (res.success) { isEditor = true; closeModal(); updateEditorUI(); showToast("Editor access granted."); renderTable(); }
+    else showToast("Incorrect password.", true);
+  });
+}
+
+function updateEditorUI() {
+  var badge = document.getElementById("authBadge");
+  document.getElementById("authLabel").textContent = isEditor ? "Editor" : "View only";
+  badge.classList.toggle("editor", isEditor);
+  document.getElementById("addBtn").disabled = !isEditor;
+  renderTable();
+}
+
+// ── TOAST ────────────────────────────────────
+function showToast(msg, err) {
+  var el = document.createElement("div");
+  el.className = "toast" + (err?" err":"");
+  el.textContent = msg;
+  document.getElementById("toastContainer").appendChild(el);
+  setTimeout(() => el.remove(), 3200);
+}
+
+function esc(s) {
+  return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+// ── INIT ─────────────────────────────────────
+loadAll();
+setInterval(loadAll, 60000);
+</script>
+</body>
+</html>
