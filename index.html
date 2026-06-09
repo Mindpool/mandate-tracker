@@ -472,7 +472,7 @@ function saveMandate() {
 
 function confirmDelete(id) {
   var m = mandates.find(x => x.id === id);
-  if (!m || !confirm("Delete mandate: "" + m.role + ""?\nThis cannot be undone.")) return;
+  if (!m || !confirm("Delete this mandate? This cannot be undone.")) return;
   api({ action:"delete", id }, function(res) {
     if (res.success) { showToast("Mandate deleted."); loadAll(); }
     else showToast("Delete failed: " + res.error, true);
