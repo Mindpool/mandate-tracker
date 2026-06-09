@@ -226,32 +226,36 @@ function api(params, cb) {
   }
   var qs = Object.keys(params).map(k => encodeURIComponent(k) + "=" + encodeURIComponent(params[k])).join("&");
   var url = SCRIPT_URL + "?" + qs;
-  if (params.action === "getAll" || params.action === "verifyPassword") {
-    var cbName = "_cb_" + Date.now();
-    window[cbName] = function(data) {
-      delete window[cbName];
-      var el = document.getElementById(cbName);
-      if (el) el.remove();
-      cb(data);
-    };
-    var s = document.createElement("script");
-    s.id = cbName;
-    s.src = url + "&callback=" + cbName;
-    s.onerror = function() {
-      delete window[cbName];
-      s.remove();
-      fetch(url, { redirect: "follow" })
-        .then(r => r.json())
-        .then(cb)
-        .catch(e => { showToast("Connection error. Check your Apps Script URL.", true); console.error(e); });
-    };
-    document.head.appendChild(s);
-  } else {
-    fetch(url, { redirect: "follow", mode: "no-cors" })
-      .catch(() => {})
-      .finally(() => { setTimeout(loadAll, 1500); });
-    cb({ success: true });
-  }
+  // Use JSONP to bypass CORS — Apps Script supports callback parameter
+  var cbName = "_cb_" + Date.now();
+  window[cbName] = function(data) {
+    try { delete window[cbName]; } catch(e) {}
+    var el = document.getElementById(cbName);
+    if (el) el.remove();
+    cb(data);
+  };
+  var s = document.createElement("script");
+  s.id = cbName;
+  s.src = url + "&callback=" + cbName;
+  s.onerror = function() {
+    try { delete window[cbName]; } catch(e) {}
+    if (s.parentNode) s.parentNode.removeChild(s);
+    showToast("Could not connect to Google Sheets.", true);
+    renderDemoTable();
+  };
+  // Timeout after 10 seconds
+  var timer = setTimeout(function() {
+    if (window[cbName]) {
+      try { delete window[cbName]; } catch(e) {}
+      if (s.parentNode) s.parentNode.removeChild(s);
+      showToast("Connection timed out. Check your Apps Script deployment.", true);
+      renderDemoTable();
+    }
+  }, 10000);
+  // Clear timer when callback fires
+  var origCb = window[cbName];
+  window[cbName] = function(data) { clearTimeout(timer); origCb(data); };
+  document.head.appendChild(s);
 }
 
 function loadAll() {
@@ -353,13 +357,9 @@ function renderTable() {
 }
 
 function renderDemoTable() {
-  mandates = [
-    { id:"1", role:"VP Credit Risk", client:"HDFC Bank", hrSpoc:"Priya Sharma", location:"Mumbai", ctcRange:"₹28–35 LPA", minExp:"8", priority:"High", openSince:"2025-04-10", cvs:8, status:"Open" },
-    { id:"2", role:"Retail Branch Manager", client:"ICICI Bank", hrSpoc:"Rohit Nair", location:"Delhi", ctcRange:"₹18–24 LPA", minExp:"5", priority:"High", openSince:"2025-04-18", cvs:5, status:"Open" },
-    { id:"3", role:"Trade Finance Analyst", client:"Axis Bank", hrSpoc:"Sneha Iyer", location:"Mumbai", ctcRange:"₹12–16 LPA", minExp:"3", priority:"Moderate", openSince:"2025-05-01", cvs:12, status:"Open" },
-    { id:"4", role:"SME Relationship Manager", client:"Yes Bank", hrSpoc:"Karan Mehta", location:"Chennai", ctcRange:"₹15–20 LPA", minExp:"4", priority:"High", openSince:"2025-05-15", cvs:9, status:"Filled / Joined 2 Jun" },
-  ];
+  mandates = [];
   populateFilters(); applyFilters(); renderStats();
+  document.getElementById("tableArea").innerHTML = '<div class="empty"><i class="ti ti-wifi-off"></i>Could not connect to Google Sheets. Check your Apps Script URL and deployment.</div>';
 }
 
 // ── CV UPDATE ────────────────────────────────
