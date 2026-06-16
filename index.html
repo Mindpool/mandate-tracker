@@ -192,6 +192,10 @@
       <option>Mass Affluent</option><option>Affluent</option><option>HNI</option><option>UHNI</option>
     </select>
 
+    <select id="f-sort" onchange="applyFilters()">
+      <option value="newest">Newest first</option>
+      <option value="oldest">Oldest first</option>
+    </select>
     <div class="spacer"></div>
     <button class="btn-add" id="addBtn" onclick="openAddModal()" disabled>
       <i class="ti ti-plus"></i> Add mandate
@@ -296,7 +300,13 @@ function applyFilters() {
   var l = document.getElementById("f-loc").value;
   var p = document.getElementById("f-pri").value;
   var mt = document.getElementById("f-mandatetype").value;
+  var sort = document.getElementById("f-sort").value;
   filtered = mandates.filter(m => (!c||m.client===c) && (!l||m.location===l) && (!p||m.priority===p) && (!mt||m.mandateType===mt));
+  if (!sort || sort === "newest") {
+    filtered.sort((a,b) => new Date(b.openSince) - new Date(a.openSince));
+  } else if (sort === "oldest") {
+    filtered.sort((a,b) => new Date(a.openSince) - new Date(b.openSince));
+  }
   renderTable();
 }
 
@@ -336,6 +346,7 @@ function renderTable() {
         </div>
       </td>
       <td><div class="td-sub">${esc(m.mandateType||"—")}</div></td>
+      <td><div class="td-sub">${esc(m.roleType||"—")}</div></td>
       <td>
         <div class="td-status-wrap">
           <span class="badge ${stClass(m.status)}">${esc(m.status.split("/")[0].trim())}</span>
@@ -358,11 +369,12 @@ function renderTable() {
       <th>HR SPOC</th>
       <th>Location</th>
       <th>CTC Range</th>
-      <th>Min Exp</th>
+      <th>Experience</th>
       <th>Priority</th>
       <th>Open Since</th>
       <th>CVs Sent</th>
       <th>Mandate Type</th>
+      <th>Role Type</th>
       <th>Status / Remarks</th>
       <th></th>
     </tr></thead>
@@ -422,7 +434,7 @@ function showMandateModal(m) {
             <input id="m-ctc" placeholder="e.g. ₹18–24 LPA" value="${m?esc(m.ctcRange||''):''}">
           </div>
           <div class="form-group">
-            <label>Min Experience (years)</label>
+            <label>Experience</label>
             <input id="m-exp" type="number" min="0" placeholder="e.g. 5" value="${m?esc(m.minExp||''):''}">
           </div>
           <div class="form-group">
@@ -433,6 +445,18 @@ function showMandateModal(m) {
               <option ${(m&&m.mandateType==="Affluent")?"selected":""}>Affluent</option>
               <option ${(m&&m.mandateType==="HNI")?"selected":""}>HNI</option>
               <option ${(m&&m.mandateType==="UHNI")?"selected":""}>UHNI</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Role Type</label>
+            <select id="m-roletype">
+              <option value="">— Select —</option>
+              <option ${(m&&m.roleType==="Sales - Individual")?"selected":""}>Sales - Individual</option>
+              <option ${(m&&m.roleType==="Sales - Playing TL")?"selected":""}>Sales - Playing TL</option>
+              <option ${(m&&m.roleType==="Sales - Non Playing TL")?"selected":""}>Sales - Non Playing TL</option>
+              <option ${(m&&m.roleType==="Sales Support")?"selected":""}>Sales Support</option>
+              <option ${(m&&m.roleType==="Product")?"selected":""}>Product</option>
+              <option ${(m&&m.roleType==="Misc")?"selected":""}>Misc</option>
             </select>
           </div>
           <div class="form-group">
@@ -475,6 +499,7 @@ function saveMandate() {
     ctcRange: document.getElementById("m-ctc").value.trim(),
     minExp:   document.getElementById("m-exp").value.trim(),
     mandateType: document.getElementById("m-mandatetype").value,
+    roleType: document.getElementById("m-roletype").value,
     priority: document.getElementById("m-pri").value,
     openSince:document.getElementById("m-date").value,
     cvs:      parseInt(document.getElementById("m-cvs").value)||0,
