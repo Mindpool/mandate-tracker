@@ -387,6 +387,8 @@ function renderTable() {
       <td><div class="td-exp">${esc(m.ctcRange||"—")}</div></td>
       <td><div class="td-exp">${m.minExp ? esc(m.minExp)+" yrs" : "—"}</div></td>
       <td><span class="badge ${priClass(m.priority)}">${m.priority}</span></td>
+      <td><div class="td-sub">${esc(m.mandateType||"—")}</div></td>
+      <td><div class="td-sub">${esc(m.roleType||"—")}</div></td>
       <td>
         <button class="details-btn" onclick="toggleDetails(this, '${m.id}')">
           <i class="ti ti-chevron-down" style="font-size:11px"></i> Details
@@ -422,7 +424,7 @@ function renderTable() {
       <th>Priority</th>
       <th>Mandate Type</th>
       <th>Role Type</th>
-      <th></th>
+      <th>Details</th>
     </tr></thead>
     <tbody>${rows}</tbody>
   </table>`;
