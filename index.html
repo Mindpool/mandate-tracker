@@ -66,20 +66,20 @@
   @keyframes spin { to { transform: rotate(360deg); } }
 
   /* Table */
-  .table-wrap { background: var(--surface); border-radius: var(--radius-lg); border: 1px solid var(--border); overflow-x: hidden; }
-  table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-  thead th { padding: 8px 7px; text-align: left; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text3); background: var(--surface2); border-bottom: 1px solid var(--border); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .table-wrap { background: var(--surface); border-radius: var(--radius-lg); border: 1px solid var(--border); overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; border-spacing: 0; }
+  thead th { padding: 11px 14px; text-align: left; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text3); background: var(--surface2); border-bottom: 1px solid var(--border); white-space: nowrap; }
   tbody tr { border-bottom: 1px solid var(--border); transition: background .1s; }
   tbody tr:last-child { border-bottom: none; }
   tbody tr:hover { background: #fafaf7; }
-  tbody td { padding: 8px 7px; vertical-align: middle; overflow: hidden; text-overflow: ellipsis; }
-  .td-role { font-weight: 500; font-size: 11px; }
+  tbody td { padding: 12px 14px; vertical-align: middle; }
+  .td-role { font-weight: 500; font-size: 13px; white-space: nowrap; }
   .td-sub { font-size: 12px; color: var(--text2); }
-  .td-mono { font-size: 10px; color: var(--text3); font-family: var(--font-mono); white-space: nowrap; }
-  .td-exp { font-size: 10px; font-family: var(--font-mono); color: var(--text2); white-space: nowrap; }
+  .td-mono { font-size: 11px; color: var(--text3); font-family: var(--font-mono); white-space: nowrap; }
+  .td-exp { font-size: 11px; font-family: var(--font-mono); color: var(--text2); white-space: nowrap; }
 
   /* Badge */
-  .badge { display: inline-flex; align-items: center; padding: 2px 6px; border-radius: 99px; font-size: 10px; font-weight: 600; letter-spacing: .02em; white-space: nowrap; }
+  .badge { display: inline-flex; align-items: center; padding: 3px 9px; border-radius: 99px; font-size: 11px; font-weight: 600; letter-spacing: .03em; white-space: nowrap; }
   .badge-high    { background: var(--high-bg);   color: var(--high); }
   .badge-med     { background: var(--med-bg);    color: var(--med); }
   .badge-low     { background: var(--low-bg);    color: var(--low); }
@@ -143,6 +143,25 @@
   .toast.err { background: var(--high); }
   @keyframes toastIn { from { transform: translateY(8px); opacity: 0; } to { transform: none; opacity: 1; } }
 
+
+  /* Expandable status */
+  .status-cell { cursor: pointer; }
+  .status-preview { display: flex; align-items: center; gap: 6px; }
+  .status-expand-btn { font-size: 10px; color: var(--text3); background: none; border: none; cursor: pointer; padding: 0; display: flex; align-items: center; gap: 3px; white-space: nowrap; }
+  .status-expand-btn:hover { color: var(--text); }
+  .status-full { margin-top: 8px; font-size: 12px; color: var(--text2); line-height: 1.5; background: var(--surface2); border-radius: var(--radius); padding: 8px 10px; white-space: pre-wrap; display: none; max-width: 260px; }
+  .status-full.open { display: block; }
+
+  /* Sticky frozen columns */
+  .sticky-col { position: sticky; background: var(--surface); z-index: 2; }
+  .sticky-col-1 { left: 0; min-width: 100px; max-width: 110px; }
+  .sticky-col-2 { left: 110px; min-width: 150px; max-width: 180px; }
+  .sticky-col-3 { left: 290px; min-width: 120px; max-width: 140px; }
+  .sticky-col-4 { left: 430px; min-width: 110px; max-width: 120px; }
+  thead .sticky-col { background: var(--surface2); z-index: 3; }
+  tbody tr:hover .sticky-col { background: #fafaf7; }
+  .sticky-col::after { content: ""; position: absolute; right: 0; top: 0; bottom: 0; width: 1px; background: var(--border); }
+  .sticky-col-4::after { width: 2px; background: var(--border-strong); }
   @media (max-width: 700px) {
     .stats { grid-template-columns: repeat(2,1fr); }
     .form-grid { grid-template-columns: 1fr; }
@@ -350,10 +369,10 @@ function renderTable() {
   }
   var rows = filtered.map(m => `
     <tr>
-      <td><div class="td-mono">${fmtDate(m.dateAdded)}</div></td>
-      <td><div class="td-role">${esc(m.role)}</div></td>
-      <td><div class="td-sub">${esc(m.client)}</div></td>
-      <td><div class="td-sub">${esc(m.hrSpoc||"—")}</div></td>
+      <td class="sticky-col sticky-col-1"><div class="td-mono">${fmtDate(m.dateAdded)}</div></td>
+      <td class="sticky-col sticky-col-2"><div class="td-role">${esc(m.role)}</div></td>
+      <td class="sticky-col sticky-col-3"><div class="td-sub">${esc(m.client)}</div></td>
+      <td class="sticky-col sticky-col-4"><div class="td-sub">${esc(m.hrSpoc||"—")}</div></td>
       <td><div class="td-sub" style="display:flex;align-items:center;gap:4px"><i class="ti ti-map-pin" style="font-size:11px;opacity:.5"></i>${esc(m.location)}</div></td>
       <td><div class="td-exp">${esc(m.ctcRange||"—")}</div></td>
       <td><div class="td-exp">${m.minExp ? esc(m.minExp)+" yrs" : "—"}</div></td>
@@ -370,9 +389,10 @@ function renderTable() {
       <td><div class="td-sub">${esc(m.roleType||"—")}</div></td>
       <td>
         <div class="td-status-wrap">
-          <span class="badge ${stClass(m.status)}">${esc(m.status.split("/")[0].trim())}</span>
-          ${m.status.includes("/")?`<div class="td-remarks">${esc(m.status.split("/").slice(1).join("/").trim())}</div>`:""}
+          <span class="badge ${stClass(m.status)}">${esc((m.status||"Open").split("/")[0].trim())}</span>
+          ${(m.status||"").length > 6 ? `<button class="status-expand-btn" onclick="event.stopPropagation();toggleStatus(this.closest('td'))"><i class="ti ti-chevron-down" style="font-size:10px"></i> more</button>` : ""}
         </div>
+        ${(m.status||"").length > 6 ? `<div class="status-full">${esc(m.status||"")}</div>` : ""}
       </td>
       <td>
         <div class="act-wrap">
@@ -385,10 +405,10 @@ function renderTable() {
 
   area.innerHTML = `<table>
     <thead><tr>
-      <th>Date Added</th>
-      <th>Role / Mandate</th>
-      <th>Client</th>
-      <th>HR SPOC</th>
+      <th class="sticky-col sticky-col-1">Date Added</th>
+      <th class="sticky-col sticky-col-2">Role / Mandate</th>
+      <th class="sticky-col sticky-col-3">Client</th>
+      <th class="sticky-col sticky-col-4">HR SPOC</th>
       <th>Location</th>
       <th>CTC Range</th>
       <th>Experience</th>
@@ -435,7 +455,11 @@ function renderCards() {
         </div>
         <div class="card-field">
           <div class="card-field-label">Status</div>
-          <div class="card-field-val"><span class="badge ${stClass(m.status)}">${esc((m.status||"Open").split("/")[0].trim())}</span></div>
+          <div class="card-field-val">
+            <span class="badge ${stClass(m.status)}">${esc((m.status||"Open").split("/")[0].trim())}</span>
+            ${(m.status||"").length > 6 ? `<button class="status-expand-btn" onclick="event.stopPropagation();toggleStatus(this.closest('.card-field-val'))"><i class="ti ti-chevron-down" style="font-size:10px"></i> more</button>` : ""}
+            ${(m.status||"").length > 6 ? `<div class="status-full">${esc(m.status||"")}</div>` : ""}
+          </div>
         </div>
       </div>
       <div class="card-bottom">
@@ -653,6 +677,20 @@ function showToast(msg, err) {
 
 function esc(s) {
   return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+// ── STATUS EXPAND ────────────────────────────
+function toggleStatus(cell) {
+  var full = cell.querySelector(".status-full");
+  var btn = cell.querySelector(".status-expand-btn");
+  if (!full) return;
+  var isOpen = full.classList.contains("open");
+  full.classList.toggle("open", !isOpen);
+  if (btn) {
+    btn.innerHTML = isOpen
+      ? '<i class="ti ti-chevron-down" style="font-size:10px"></i> more'
+      : '<i class="ti ti-chevron-up" style="font-size:10px"></i> less';
+  }
 }
 
 // ── INIT ─────────────────────────────────────
