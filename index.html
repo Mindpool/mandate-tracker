@@ -319,9 +319,7 @@ function renderStats() {
     return s === "open" || s === "";
   }
   document.getElementById("s-total").textContent = mandates.length;
-  document.getElementById("s-open").textContent  = mandates.filter(m => isOpen(m)).length;
   document.getElementById("s-high").textContent  = mandates.filter(m => m.priority === "High" && isOpen(m)).length;
-  document.getElementById("s-cvs").textContent   = mandates.reduce((s,m) => s + (parseInt(m.cvs)||0), 0);
 }
 
 // ── FILTERS ──────────────────────────────────
