@@ -73,8 +73,8 @@
   tbody tr:last-child { border-bottom: none; }
   tbody tr:hover { background: #fafaf7; }
   tbody td { padding: 12px 14px; vertical-align: middle; }
-  .td-role { font-weight: 500; font-size: 13px; white-space: nowrap; }
-  .td-sub { font-size: 12px; color: var(--text2); }
+  .td-role { font-weight: 500; font-size: 13px; white-space: normal; word-break: break-word; }
+  .td-sub { font-size: 12px; color: var(--text2); white-space: normal; word-break: break-word; }
   .td-mono { font-size: 11px; color: var(--text3); font-family: var(--font-mono); white-space: nowrap; }
   .td-exp { font-size: 11px; font-family: var(--font-mono); color: var(--text2); white-space: nowrap; }
 
@@ -154,10 +154,10 @@
 
   /* Sticky frozen columns */
   .sticky-col { position: sticky; background: var(--surface); z-index: 2; }
-  .sticky-col-1 { left: 0; min-width: 100px; max-width: 110px; }
-  .sticky-col-2 { left: 110px; min-width: 150px; max-width: 180px; }
-  .sticky-col-3 { left: 290px; min-width: 120px; max-width: 140px; }
-  .sticky-col-4 { left: 430px; min-width: 110px; max-width: 120px; }
+  .sticky-col-1 { left: 0; min-width: 100px; max-width: 110px; white-space: normal; }
+  .sticky-col-2 { left: 110px; min-width: 160px; max-width: 200px; white-space: normal; }
+  .sticky-col-3 { left: 310px; min-width: 130px; max-width: 150px; white-space: normal; }
+  .sticky-col-4 { left: 460px; min-width: 120px; max-width: 140px; white-space: normal; }
   thead .sticky-col { background: var(--surface2); z-index: 3; }
   tbody tr:hover .sticky-col { background: #fafaf7; }
   .sticky-col::after { content: ""; position: absolute; right: 0; top: 0; bottom: 0; width: 1px; background: var(--border); }
