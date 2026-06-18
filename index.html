@@ -154,14 +154,14 @@
 
   /* Sticky frozen columns */
   .sticky-col { position: sticky; background: var(--surface); z-index: 2; }
-  .sticky-col-1 { left: 0; min-width: 100px; max-width: 110px; white-space: normal; }
-  .sticky-col-2 { left: 110px; min-width: 160px; max-width: 200px; white-space: normal; }
-  .sticky-col-3 { left: 310px; min-width: 130px; max-width: 150px; white-space: normal; }
-  .sticky-col-4 { left: 460px; min-width: 120px; max-width: 140px; white-space: normal; }
+  .sticky-col-1 { left: 0; width: 100px; }
+  .sticky-col-2 { left: 100px; width: 180px; }
+  .sticky-col-3 { left: 280px; width: 130px; }
+  .sticky-col-4 { left: 410px; width: 120px; }
   thead .sticky-col { background: var(--surface2); z-index: 3; }
   tbody tr:hover .sticky-col { background: #fafaf7; }
   .sticky-col::after { content: ""; position: absolute; right: 0; top: 0; bottom: 0; width: 1px; background: var(--border); }
-  .sticky-col-4::after { width: 2px; background: var(--border-strong); }
+  .sticky-col-4::after { content: ""; position: absolute; right: -4px; top: 0; bottom: 0; width: 4px; background: linear-gradient(to right, rgba(0,0,0,0.06), transparent); border: none; }
   @media (max-width: 700px) {
     .stats { grid-template-columns: repeat(2,1fr); }
     .form-grid { grid-template-columns: 1fr; }
