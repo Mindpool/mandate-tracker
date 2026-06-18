@@ -44,7 +44,7 @@
   .auth-badge.editor { color: var(--text); }
 
   /* Stats */
-  .stats { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 12px; margin-bottom: 1.75rem; }
+  .stats { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; margin-bottom: 1.75rem; }
   .stat { background: var(--surface); border-radius: var(--radius-lg); border: 1px solid var(--border); padding: 16px 18px; }
   .stat-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text3); font-weight: 500; margin-bottom: 8px; }
   .stat-val { font-size: 28px; font-weight: 600; letter-spacing: -0.03em; font-family: var(--font-mono); }
@@ -162,16 +162,7 @@
   .status-full { margin-top: 8px; font-size: 12px; color: var(--text2); line-height: 1.5; background: var(--surface2); border-radius: var(--radius); padding: 8px 10px; white-space: pre-wrap; display: none; max-width: 260px; }
   .status-full.open { display: block; }
 
-  /* Sticky frozen columns */
-  .sticky-col { position: sticky; background: var(--surface); z-index: 2; }
-  .sticky-col-1 { left: 0; width: 100px; }
-  .sticky-col-2 { left: 100px; width: 180px; }
-  .sticky-col-3 { left: 280px; width: 130px; }
-  .sticky-col-4 { left: 410px; width: 120px; }
-  thead .sticky-col { background: var(--surface2); z-index: 3; }
-  tbody tr:hover .sticky-col { background: #fafaf7; }
-  .sticky-col::after { content: ""; position: absolute; right: 0; top: 0; bottom: 0; width: 1px; background: var(--border); }
-  .sticky-col-4::after { content: ""; position: absolute; right: -4px; top: 0; bottom: 0; width: 4px; background: linear-gradient(to right, rgba(0,0,0,0.06), transparent); border: none; }
+
   @media (max-width: 700px) {
     .stats { grid-template-columns: repeat(2,1fr); }
     .form-grid { grid-template-columns: 1fr; }
@@ -220,9 +211,9 @@
   <!-- STATS -->
   <div class="stats">
     <div class="stat"><div class="stat-label">Total mandates</div><div class="stat-val" id="s-total">—</div></div>
-    <div class="stat"><div class="stat-label">Open</div><div class="stat-val" id="s-open">—</div></div>
+
     <div class="stat"><div class="stat-label">High priority</div><div class="stat-val c-hi" id="s-high">—</div></div>
-    <div class="stat"><div class="stat-label">Total CVs sent</div><div class="stat-val c-lo" id="s-cvs">—</div></div>
+
   </div>
 
   <!-- TOOLBAR -->
@@ -379,10 +370,10 @@ function renderTable() {
   }
   var rows = filtered.map(m => `
     <tr>
-      <td class="sticky-col sticky-col-1"><div class="td-mono">${fmtDate(m.dateAdded)}</div></td>
-      <td class="sticky-col sticky-col-2"><div class="td-role">${esc(m.role)}</div></td>
-      <td class="sticky-col sticky-col-3"><div class="td-sub">${esc(m.client)}</div></td>
-      <td class="sticky-col sticky-col-4"><div class="td-sub">${esc(m.hrSpoc||"—")}</div></td>
+      <td ><div class="td-mono">${fmtDate(m.dateAdded)}</div></td>
+      <td ><div class="td-role">${esc(m.role)}</div></td>
+      <td ><div class="td-sub">${esc(m.client)}</div></td>
+      <td ><div class="td-sub">${esc(m.hrSpoc||"—")}</div></td>
       <td><div class="td-sub" style="display:flex;align-items:center;gap:4px"><i class="ti ti-map-pin" style="font-size:11px;opacity:.5"></i>${esc(m.location)}</div></td>
       <td><div class="td-exp">${esc(m.ctcRange||"—")}</div></td>
       <td><div class="td-exp">${m.minExp ? esc(m.minExp)+" yrs" : "—"}</div></td>
@@ -414,10 +405,10 @@ function renderTable() {
 
   area.innerHTML = `<table>
     <thead><tr>
-      <th class="sticky-col sticky-col-1">Date Added</th>
-      <th class="sticky-col sticky-col-2">Role / Mandate</th>
-      <th class="sticky-col sticky-col-3">Client</th>
-      <th class="sticky-col sticky-col-4">HR SPOC</th>
+      <th >Date Added</th>
+      <th >Role / Mandate</th>
+      <th >Client</th>
+      <th >HR SPOC</th>
       <th>Location</th>
       <th>CTC Range</th>
       <th>Experience</th>
