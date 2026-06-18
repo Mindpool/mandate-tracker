@@ -144,6 +144,16 @@
   @keyframes toastIn { from { transform: translateY(8px); opacity: 0; } to { transform: none; opacity: 1; } }
 
 
+  /* Expandable row details */
+  .details-btn { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 500; color: var(--text3); background: var(--surface2); border: 0.5px solid var(--border); border-radius: 99px; padding: 3px 10px; cursor: pointer; white-space: nowrap; transition: all .15s; }
+  .details-btn:hover { background: var(--surface); color: var(--text); border-color: var(--border-strong); }
+  .details-row { display: none; background: #fafaf8; }
+  .details-row.open { display: table-row; }
+  .details-inner { padding: 10px 14px 14px 14px; display: flex; gap: 32px; flex-wrap: wrap; }
+  .detail-item { }
+  .detail-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text3); margin-bottom: 3px; }
+  .detail-val { font-size: 12px; color: var(--text); line-height: 1.5; max-width: 320px; white-space: pre-wrap; }
+
   /* Expandable status */
   .status-cell { cursor: pointer; }
   .status-preview { display: flex; align-items: center; gap: 6px; }
@@ -377,28 +387,25 @@ function renderTable() {
       <td><div class="td-exp">${esc(m.ctcRange||"—")}</div></td>
       <td><div class="td-exp">${m.minExp ? esc(m.minExp)+" yrs" : "—"}</div></td>
       <td><span class="badge ${priClass(m.priority)}">${m.priority}</span></td>
-      <td><div class="td-mono">${fmtDate(m.openSince)}</div></td>
       <td>
-        <div class="cv-ctrl">
-          <button class="cv-btn" onclick="changeCv('${m.id}',-1)" ${!isEditor?"disabled":""}>−</button>
-          <span class="cv-num">${m.cvs}</span>
-          <button class="cv-btn" onclick="changeCv('${m.id}',1)"  ${!isEditor?"disabled":""}>+</button>
-        </div>
-      </td>
-      <td><div class="td-sub">${esc(m.mandateType||"—")}</div></td>
-      <td><div class="td-sub">${esc(m.roleType||"—")}</div></td>
-      <td>
-        <div class="td-status-wrap">
-          <span class="badge ${stClass(m.status)}">${esc((m.status||"Open").split("/")[0].trim())}</span>
-          ${(m.status||"").length > 6 ? `<button class="status-expand-btn" onclick="event.stopPropagation();toggleStatus(this.closest('td'))"><i class="ti ti-chevron-down" style="font-size:10px"></i> more</button>` : ""}
-        </div>
-        ${(m.status||"").length > 6 ? `<div class="status-full">${esc(m.status||"")}</div>` : ""}
+        <button class="details-btn" onclick="toggleDetails(this, '${m.id}')">
+          <i class="ti ti-chevron-down" style="font-size:11px"></i> Details
+        </button>
       </td>
       <td>
         <div class="act-wrap">
           ${isEditor?`
             <button class="act-btn" onclick="openEditModal('${m.id}')" title="Edit"><i class="ti ti-pencil"></i></button>
             <button class="act-btn del" onclick="confirmDelete('${m.id}')" title="Delete"><i class="ti ti-trash"></i></button>`:""}
+        </div>
+      </td>
+    </tr>
+    <tr class="details-row" id="details-${m.id}">
+      <td colspan="12">
+        <div class="details-inner">
+          <div class="detail-item"><div class="detail-label">Open Since</div><div class="detail-val">${fmtDate(m.openSince)||"—"}</div></div>
+          <div class="detail-item"><div class="detail-label">CVs Sent</div><div class="detail-val" style="display:flex;align-items:center;gap:8px"><button class="cv-btn" onclick="changeCv('${m.id}',-1)" ${!isEditor?"disabled":""}>−</button><span class="cv-num">${m.cvs}</span><button class="cv-btn" onclick="changeCv('${m.id}',1)" ${!isEditor?"disabled":""}>+</button></div></div>
+          <div class="detail-item"><div class="detail-label">Status / Remarks</div><div class="detail-val">${esc(m.status||"—")}</div></div>
         </div>
       </td>
     </tr>`).join("");
@@ -413,11 +420,8 @@ function renderTable() {
       <th>CTC Range</th>
       <th>Experience</th>
       <th>Priority</th>
-      <th>Open Since</th>
-      <th>CVs Sent</th>
       <th>Mandate Type</th>
       <th>Role Type</th>
-      <th>Status / Remarks</th>
       <th></th>
     </tr></thead>
     <tbody>${rows}</tbody>
@@ -677,6 +681,17 @@ function showToast(msg, err) {
 
 function esc(s) {
   return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+// ── ROW DETAILS EXPAND ───────────────────────
+function toggleDetails(btn, id) {
+  var row = document.getElementById("details-" + id);
+  if (!row) return;
+  var isOpen = row.classList.contains("open");
+  row.classList.toggle("open", !isOpen);
+  btn.innerHTML = isOpen
+    ? '<i class="ti ti-chevron-down" style="font-size:11px"></i> Details'
+    : '<i class="ti ti-chevron-up" style="font-size:11px"></i> Close';
 }
 
 // ── STATUS EXPAND ────────────────────────────
