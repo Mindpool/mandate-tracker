@@ -314,12 +314,8 @@ function loadAll() {
 
 // ── STATS ────────────────────────────────────
 function renderStats() {
-  function isOpen(m) {
-    var s = (m.status || "").toLowerCase().trim();
-    return s === "open" || s === "";
-  }
   document.getElementById("s-total").textContent = mandates.length;
-  document.getElementById("s-high").textContent  = mandates.filter(m => m.priority === "High" && isOpen(m)).length;
+  document.getElementById("s-high").textContent  = mandates.filter(m => m.priority === "High").length;
 }
 
 // ── FILTERS ──────────────────────────────────
