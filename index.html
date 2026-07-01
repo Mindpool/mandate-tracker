@@ -262,7 +262,7 @@
     </select>
     <select id="f-mandatetype" onchange="applyFilters()">
       <option value="">All mandate types</option>
-      <option>Mass Affluent</option><option>Affluent</option><option>HNI</option><option>UHNI</option>
+      <option>Mass Affluent</option><option>Affluent</option><option>HNI</option><option>UHNI</option><option>Others</option>
     </select>
 
     <select id="f-sort" onchange="applyFilters()">
@@ -420,7 +420,7 @@ function renderTable() {
   }
   var rows = filtered.map(m => `
     <tr>
-      <td ><div class="td-mono">${fmtDate(m.dateAdded)}</div></td>
+      <td ><div class="td-mono">${fmtDate(m.openSince)}</div></td>
       <td ><div class="td-role">${esc(m.role)}</div></td>
       <td ><div class="td-sub">${esc(m.client)}</div></td>
       <td ><div class="td-sub">${esc(m.hrSpoc||"—")}</div></td>
@@ -455,7 +455,7 @@ function renderTable() {
 
   area.innerHTML = `<table>
     <thead><tr>
-      <th >Date Added</th>
+      <th>Open Since</th>
       <th >Role / Mandate</th>
       <th >Client</th>
       <th >HR SPOC</th>
@@ -588,6 +588,7 @@ function showMandateModal(m) {
               <option ${(m&&m.mandateType==="Affluent")?"selected":""}>Affluent</option>
               <option ${(m&&m.mandateType==="HNI")?"selected":""}>HNI</option>
               <option ${(m&&m.mandateType==="UHNI")?"selected":""}>UHNI</option>
+              <option ${(m&&m.mandateType==="Others")?"selected":""}>Others</option>
             </select>
           </div>
           <div class="form-group">
